@@ -48,11 +48,20 @@ module.exports = {
         user: selector,
         password: hashPassword(password)
     }, (err, result)=>{
-      this._endLoggingIn();
-
-      this._handleLoginCallback(err, result);
-
-      typeof callback == 'function' && callback(err);
+      if (err) {
+        call('login', {
+            ldapUsername: selector.username,
+            ldapPassword: password,
+        }, (err, result) => {
+          this._endLoggingIn();
+          this._handleLoginCallback(err, result);
+          typeof callback == 'function' && callback(err);
+        });
+      } else {
+        this._endLoggingIn();
+        this._handleLoginCallback(err, result);
+        typeof callback == 'function' && callback(err);
+      }
     });
   },
   logoutOtherClients(callback = ()=>{}) {
